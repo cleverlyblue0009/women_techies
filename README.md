@@ -38,13 +38,15 @@ All services run locally using `npm run dev`, `npm start`, and `uvicorn`.
    - Define vars via `.env` files per service as needed (e.g., `AI_SERVICE_URL` for backend, Firebase credentials later).
    - Frontend can override the backend API URL via `frontend/.env` (copy `.env.example` and adjust `VITE_BACKEND_URL`).
    - Provide a Google Maps API key via `VITE_GOOGLE_MAPS_KEY` when you want to display the live map.
+   - AI service relies on `NEWS_API_KEY` (NewsAPI) and `BACKEND_URL` to score risk.
 
 ## Connecting the Stack
 
 - Frontend components call `/api/complaints` on the backend using Axios (wrapped in `frontend/src/utils/api.js`).
 - Complaint submissions land in the backend memory store, which also responds with the saved record for the dashboard list.
-- Backend proxies `/api/ai/safety-score` to the FastAPI AI service so the frontend can show a live `safety_score`/`risk_level`.
+- Backend proxies `/api/ai/risk` to the FastAPI AI service so the frontend can show a live `safety_score`/`risk_level`.
 - Google Maps renders the user location plus complaint markers (configurable via `VITE_GOOGLE_MAPS_KEY`) while the AI-based alert banner reacts to score drops.
+- Frontend caches complaints, safety scores, and offline reports via localStorage so the UI remains functional offline and syncs when back online.
 - You can point the frontend and backend to real Firebase/Firestore once credentials are configured; the current flow works fully locally for demoing the UI and APIs.
 
 ## API Routes (Backend)
@@ -55,7 +57,9 @@ All services run locally using `npm run dev`, `npm start`, and `uvicorn`.
 | `/api/complaints` | GET | List complaints |
 | `/api/complaints/:id` | PATCH | Update status/fields (status must be submitted, under_review, escalated, resolved) |
 | `/api/complaints/:id/files` | POST | Upload file, hashes response (multipart/form-data field `file`) |
-| `/api/ai/safety-score` | POST | Proxy to AI microservice |
+| `/api/contacts` | GET | List stored emergency contacts |
+| `/api/contacts` | POST | Add a new emergency contact |
+| `/api/ai/risk` | POST | Proxy to AI service `/predict-risk` |
 
 ## Frontend Scripts
 
@@ -66,7 +70,7 @@ All services run locally using `npm run dev`, `npm start`, and `uvicorn`.
 
 - Tailwind config uses premium dark theme colors; components demonstrate complaint form, dashboard, and evidence list.
 - Backend is ready to wire Firestore/Firebase Storage and AI service endpoints.
-- AI service exposes `/predict-safety`, accepts `latitude`, `longitude`, and `time_of_day`, and mixes night penalties with random variation for the returned safety score/risk level.
+- AI service exposes `/predict-risk`, accepts `latitude`, `longitude`, and `time_of_day`, mixes night penalties with complaint/news deductions, and returns `safety_score`, `risk_level`, and matched headlines (configure `NEWS_API_KEY` + `BACKEND_URL`).
 - Frontend integrates Google Maps via `@react-google-maps/api`; provide `VITE_GOOGLE_MAPS_KEY` to render user/complaint markers and the alert banner.
 
 Feel free to expand each section with real integrations (Firebase, Google Maps, hashing uploads) as needed.

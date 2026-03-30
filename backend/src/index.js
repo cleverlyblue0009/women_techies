@@ -3,6 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import complaintRoutes from './routes/complaints.js';
 import aiRoutes from './routes/ai.js';
+import contactRoutes from './routes/contacts.js';
 
 dotenv.config();
 
@@ -12,6 +13,7 @@ app.use(express.json());
 
 app.use('/api/complaints', complaintRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/contacts', contactRoutes);
 
 app.get('/health', (_req, res) => {
   res.status(200).json({ message: 'Personal safety backend running' });
