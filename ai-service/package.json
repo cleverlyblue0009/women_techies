@@ -1,0 +1,9 @@
+{
+  "name": "personal-safety-ai",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "uvicorn src.main:app --reload"
+  },
+  "dependencies": {}
+}
